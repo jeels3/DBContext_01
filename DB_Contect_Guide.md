@@ -142,5 +142,3 @@ public class UserRepository : IDisposable
     }
 }
 ```
-
-... (rest of markdown content continues with same explanations and diagrams as previous version, but with 'User' naming instead of 'Campaign') ...
