@@ -1,4 +1,4 @@
-    # 🧭 Database Context Usage Guide  
+# 🧭 Database Context Usage Guide  
 ### Optimizing Data Access for Large-Scale Production Systems
 
 ## ⚙️ Overview
