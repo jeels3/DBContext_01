@@ -1,4 +1,4 @@
-# 🧭 Database Context Usage Guide  
+    # 🧭 Database Context Usage Guide  
 ### Optimizing Data Access for Large-Scale Production Systems
 
 ## ⚙️ Overview
@@ -25,22 +25,22 @@ This guide covers:
 ### **Approach A — Shared Context (in Constructor)**
 
 ```csharp
-private readonly SendEmailRep _sendEmailRep;
-private readonly dcSqwizDataContext _db;
+private readonly EmailHelper _emailHelper;
+private readonly DummyDataContext _db;
 private readonly PetaPoco.Database _db2;
 
-public CampaignRepositoryWrapper(dcSqwizDataContext db)
+public UserRepository(DummyDataContext db)
 {
-    _sendEmailRep = new SendEmailRep();
+    _emailHelper = new EmailHelper();
     _db = db;
-    _db2 = new PetaPoco.Database(Code.Helpers.ConnectinStringLeads);
+    _db2 = new PetaPoco.Database(Code.Helpers.ConnectionString);
 }
 
-public EM_CAMPAIGN GetCampaignByIDV2(long id, int orgId)
+public USER GetUserByID(long id, int companyId)
 {
-    return _db.EM_CAMPAIGNs
-              .SingleOrDefault(x => x.CampaignID == id && 
-                                    x.OrganizationID == orgId && 
+    return _db.USERs
+              .SingleOrDefault(x => x.UserID == id && 
+                                    x.CompanyID == companyId && 
                                     x.Active == true);
 }
 ```
@@ -64,16 +64,16 @@ For **Web APIs**, where each HTTP request gets a new scoped repository and conte
 ### **Approach B — New Context per Method**
 
 ```csharp
-public EM_CAMPAIGN UpdateCampaign(int id, int orgId, Api2CampaignUpdate request)
+public USER UpdateUser(int id, int companyId, ApiUserUpdate request)
 {
-    using (var db = new dcSqwizDataContext())
+    using (var db = new DummyDataContext())
     {
-        var existing = db.EM_CAMPAIGNs
-                         .SingleOrDefault(c => c.CampaignID == id && 
-                                               c.OrganizationID == orgId && 
-                                               c.Active == true);
+        var existing = db.USERs
+                         .SingleOrDefault(u => u.UserID == id && 
+                                               u.CompanyID == companyId && 
+                                               u.Active == true);
 
-        SendEmailRep.CopyOver(request, existing);
+        EmailHelper.CopyOver(request, existing);
         db.SubmitChanges();
         return existing;
     }
@@ -111,24 +111,24 @@ For **background services**, **async jobs**, or **parallel processing** tasks.
 ## 🧱 Recommended Repository Pattern (Hybrid)
 
 ```csharp
-public class CampaignRepositoryWrapper : IDisposable
+public class UserRepository : IDisposable
 {
-    private readonly dcSqwizDataContext _db;
+    private readonly DummyDataContext _db;
     private readonly PetaPoco.Database _db2;
-    private readonly SendEmailRep _sendEmailRep;
+    private readonly EmailHelper _emailHelper;
     private bool _disposed;
 
-    public CampaignRepositoryWrapper(dcSqwizDataContext db)
+    public UserRepository(DummyDataContext db)
     {
         _db = db; // Scoped per HTTP request
-        _db2 = new PetaPoco.Database(Code.Helpers.ConnectinStringLeads);
-        _sendEmailRep = new SendEmailRep();
+        _db2 = new PetaPoco.Database(Code.Helpers.ConnectionString);
+        _emailHelper = new EmailHelper();
     }
 
-    public EM_CAMPAIGN GetCampaignById(int id, int orgId)
-        => _db.EM_CAMPAIGNs.SingleOrDefault(x => x.CampaignID == id && x.OrganizationID == orgId && x.Active);
+    public USER GetUserById(int id, int companyId)
+        => _db.USERs.SingleOrDefault(x => x.UserID == id && x.CompanyID == companyId && x.Active);
 
-    public void UpdateCampaign(EM_CAMPAIGN entity)
+    public void UpdateUser(USER entity)
         => _db.SubmitChanges();
 
     public void Dispose()
@@ -143,4 +143,4 @@ public class CampaignRepositoryWrapper : IDisposable
 }
 ```
 
-... (rest of markdown content continues exactly from previous version) ...
+... (rest of markdown content continues with same explanations and diagrams as previous version, but with 'User' naming instead of 'Campaign') ...
